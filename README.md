@@ -22,7 +22,7 @@ The following command will generate a SQLite database named `repology.db`. Since
 npm start
 ```
 
-At the moment of writing, Repology has about ~1285 project pages, aproximately 257k projects, which results in a ~450MB database.
+At the moment of writing, Repology has about ~1285 project pages, approximately 257K projects, which result in a ~450MB database and a total export time of ~30 minutes.
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
