@@ -2,11 +2,16 @@ import Axios from "axios";
 import { Project, ProjectSearchResult } from "./repology-types";
 import { createTablesIfNotExists as createOrResetTables, db } from "./database";
 import { NewProjectProvider } from "./database-types";
+import { loadConfig } from "./config";
 
-const getProjectSearchResults = async (projectName: string): Promise<ProjectSearchResult> => {
-    const response = await Axios.get<ProjectSearchResult>(`https://repology.org/api/v1/projects/${projectName}`)
-        .then(response => response.data);
-    return response;
+const getProjectSearchResults = async (projectName: string, userAgent: string): Promise<ProjectSearchResult> => {
+    const response = await Axios.get<ProjectSearchResult>(`https://repology.org/api/v1/projects/${projectName}`, {
+        headers: {
+            'User-Agent': userAgent,
+        }
+    });
+     
+    return response.data;
 }
 
 const mapProjectSearchResultToNewProjectProvider = (projectName: string, result: Project): NewProjectProvider => {
@@ -52,19 +57,21 @@ const leftPad = (str: string, length: number, padChar: string = ' ') => {
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function main() {
+    const config = await loadConfig();
     await createOrResetTables();
 
     let lastProjectName = '';
     for (let i = 1; true; i++) {
-        // Repology API has a rate limit of 1 request per second. We'll be nice and wait 950ms as `setTimeout` is not accurate.
-        const apiThrottleDelay = delay(950);
+        const apiThrottleDelay = delay(config.requestDelayMs);
 
-        const currentTime = new Date().toISOString().split('T').pop()?.split('.')[0];
-        const currentIteration = leftPad(i.toString(), 4, ' ');
-        const totalResultsNo = leftPad((i * 200).toString(), 6, ' ');
-        console.log(`${currentTime} | Iteration ${currentIteration} | Found a total of ${totalResultsNo} results | Cursor at: ${lastProjectName || 'N/A'}`)
+        if (config.verbose) {
+            const currentTime = new Date().toISOString().split('T').pop()?.split('.')[0];
+            const currentIteration = leftPad(i.toString(), 4, ' ');
+            const totalResultsNo = leftPad((i * 200).toString(), 6, ' ');
+            console.log(`${currentTime} | Iteration ${currentIteration} | Found a total of ${totalResultsNo} results | Cursor at: ${lastProjectName || 'N/A'}`);
+        }
 
-        const results = await getProjectSearchResults(lastProjectName.split('/').pop()!);
+        const results = await getProjectSearchResults(lastProjectName.split('/').pop()!, config.userAgent);
         
         const projectsNo = Object.keys(results).length;
         if (projectsNo === 1) {

@@ -1,0 +1,8 @@
+# User-Agent to use for the requests
+user_agent:
+
+# The delay between requests in milliseconds
+request_delay_ms: 1000
+
+# Prints out progress of the export
+verbose: true

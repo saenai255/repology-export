@@ -14,6 +14,11 @@ This project contains a script to generate a SQLite database from the [Repology]
 npm install
 ```
 
+### Configure
+Copy the `config.yaml.example` file to `config.yaml` and edit it to your needs.
+
+**Note**: Repology demands a unique User Agent and a request interval of at least 1 second.
+
 ### Generate data
 
 The following command will generate a SQLite database named `repology.db`. Since the Repology API is rate-limited, this process may take a while.
